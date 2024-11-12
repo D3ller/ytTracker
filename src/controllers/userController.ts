@@ -1,6 +1,6 @@
 import {Elysia, error, t} from "elysia";
-import {usr, Users, User} from "./models/userModel";
-import {jwt} from '@elysiajs/jwt'
+import {usr, Users} from "../models/userModel";
+import {clearToken} from "../libs/token.utils";
 
 export const userService = new Elysia({name: 'user/service'})
 
@@ -10,7 +10,7 @@ export const userService = new Elysia({name: 'user/service'})
             password: t.String({minLength: 8})
         }),
         session: t.Cookie({
-            session: t.String()
+            token: t.String()
         })
     })
     .model((model) => ({
@@ -23,20 +23,25 @@ export const userService = new Elysia({name: 'user/service'})
 
             onBeforeHandle(
                 ({error, cookie: {token}, jwt}) => {
-                    if (!token.value)
+                    console.log(token.value + ' token')
+                    if (!token.value) {
+                        clearToken(token)
                         return error(401, {
                             success: false,
                             message: 'Unauthorized'
                         })
-
+                    }
 
                     const userInfo = jwt.verify(token.value)
+                    console.log(userInfo)
 
-                    if (!userInfo)
+                    if (!userInfo) {
+                        clearToken(token)
                         return error(401, {
                             success: false,
                             message: 'Unauthorized'
                         })
+                    }
                 }
             )
         },
@@ -66,7 +71,7 @@ export const getUserId = new Elysia()
     .guard({
         as: 'scoped',
         isSignIn: true,
-        cookie: 'session',
+        cookie: 'token',
     })
     .resolve(
         {as: 'scoped'},
@@ -76,7 +81,7 @@ export const getUserId = new Elysia()
     )
     .as('plugin')
 
-export const user = new Elysia({prefix: '/auth'})
+export const userController = new Elysia({prefix: '/auth'})
     .decorate('usr', new Users())
     .model({usr: usr})
     .use(userService)
@@ -94,8 +99,10 @@ export const user = new Elysia({prefix: '/auth'})
 
                 token.set({
                     value: await jwt.sign(user),
-                    httpOnly: true,
-                    maxAge: 60 * 60 * 24 * 7
+                    httpOnly: false,
+                    maxAge: 60 * 60 * 24 * 7,
+                    secure: true,
+                    sameSite: 'none'
                 })
 
                 return {
@@ -125,8 +132,10 @@ export const user = new Elysia({prefix: '/auth'})
             if (User.success) {
                 token.set({
                     value: await jwt.sign(User.user),
-                    httpOnly: true,
-                    maxAge: 60 * 60 * 24 * 7
+                    httpOnly: false,
+                    secure: true,
+                    maxAge: 60 * 60 * 24 * 7,
+                    sameSite: 'none'
                 })
             }
             return User;
@@ -160,28 +169,38 @@ export const user = new Elysia({prefix: '/auth'})
         isSignIn: true,
     })
     .use(getUserId)
-    .get('/me', async ({cookie: {token}, userInfo, usr, jwt}) => {
+    .get('/me', async ({cookie: {token}, jwt, userInfo, usr}) => {
 
         const user = await usr.getUserById(userInfo.id)
         delete user.password;
 
         token.set({
             value: await jwt.sign(user),
-            httpOnly: true,
-            maxAge: 60 * 60 * 24 * 7
+            httpOnly: false,
+            maxAge: 60 * 60 * 24 * 7,
+            secure: true,
+            sameSite: 'none'
         })
-
 
         return {
             success: true,
             user: user
         }
-    }, {
-        isSignIn: true
-    })
-    .get('/profile', ({userInfo}) => {
+    }, {isSignIn: true, cookie: 'optionalSession'})
+    .get('/profile', async ({usr, userInfo, cookie: {token}}) => {
+        const user = await usr.getUserByUsername(userInfo.username)
+        if(!user) {
+            clearToken(token)
+            return error(404, {
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        delete user.password;
+
         return {
             success: true,
-            userInfo
+            user
         };
     }, {isSignIn: true});
