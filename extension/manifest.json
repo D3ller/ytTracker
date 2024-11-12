@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Watch Tracker",
+  "version": "1.1",
+  "description": "Track watched videos and send video IDs to the server with authentication.",
+  "permissions": ["cookies", "storage", "scripting", "tabs", "activeTab"],
+  "host_permissions": ["https://www.youtube.com/*", "http://localhost:3000/"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  }
+}
