@@ -12,6 +12,7 @@ export const usr = t.Object({
 })
 
 export type User = typeof usr.static;
+// export type UserWithoutPassword = Omit<User, 'password'>;
 
 export class Users {
 
@@ -50,6 +51,8 @@ export class Users {
     }
 
     async connectUser(username: string, password: string) {
+
+        console.log(username, password);
 
         const user = await this.getUserByUsername(username);
         if(!user) return error(404, {
