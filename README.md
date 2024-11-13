@@ -1,8 +1,9 @@
+
 # YT Stats Tracker
 
 ## Description
 
-YT Stats Tracker is a web application for tracking YouTube video and channel statistics. This project is built entirely in TypeScript and uses ElysiaJS as its backend framework, ensuring a modern, scalable setup. It is also open-source, making it freely available for anyone to use and modify. With this tool, users can monitor how many times a video has been viewed, the frequency of watching a channel, and the time spent on each video. This project is built using Bun, offering a fast and lightweight experience for development. The combination of Bun, ElysiaJS, and TypeScript makes this project efficient and easy to extend.
+YT Stats Tracker is a web application for tracking YouTube video and channel statistics. This project is built entirely in TypeScript and uses ElysiaJS as its backend framework, ensuring a modern, scalable setup. It is also open-source, making it freely available for anyone to use and modify. With this tool, users can monitor how many times a video has been viewed, the frequency of watching a channel, and the time spent on each video. This project is built using Bun, offering a fast and lightweight expe...
 
 ### Prerequisites
 
@@ -21,6 +22,17 @@ bun dev
 ```
 
 This command will launch the server, allowing you to view and interact with the YT Stats Tracker app.
+
+### Corrective Actions
+
+- **Correct the `env.local` file**: Ensure that the environment variables are properly configured for your development and production setup. This includes the database connection string and any API keys.
+- **Add a Prisma seed**: To initialize the database with a default user, create a Prisma seed file and run the following command:
+
+  ```sh
+  npx prisma db seed
+  ```
+
+  This will populate your database with essential initial data.
 
 ### Browser Extension Setup
 
