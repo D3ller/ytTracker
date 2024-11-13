@@ -189,7 +189,7 @@ export class Videos {
         if (!userId) {
             return error(401, {
                 success: false,
-                message: 'Unauthorized2'
+                message: 'Unauthorized'
             })
         }
 
@@ -261,6 +261,113 @@ export class Videos {
             }
         });
 
+
+        const detailedVideos = await prisma.video.findMany({
+            where: {
+                youtubeId: { in: groupedVideos.map(g => g.youtubeId) },
+                userId: userFound.id,
+            },
+            select: {
+                youtubeId: true,
+                information: {
+                    select: {
+                        title: true,
+                        thumbnail: true,
+                        author: true,
+                        authorUrl: true
+                    }
+                }
+            }
+        });
+
+        const finalResult = groupedVideos.map(group => {
+            const details = detailedVideos.find(video => video.youtubeId === group.youtubeId);
+            return {
+                ...group,
+                information: details?.information
+            };
+        });
+
+        return finalResult;
+
+
+    }
+
+    async getStatsByUsername(timeslot: TimeRange, username: string) {
+        if (!validTimeRanges.includes(timeslot)) {
+            return error(400, {
+                success: false,
+                message: 'Invalid time range'
+            });
+        }
+
+        const user = new Users();
+        const userFound = await user.getUserByUsername(username);
+        if (!userFound) {
+            return error(404, {
+                success: false,
+                message: 'User not found'
+            })
+        }
+
+        const date = new Date();
+        let startDate: Date;
+        let endDate: Date;
+
+        switch (timeslot) {
+            case 'today':
+                startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+                break;
+            case 'weekly':
+                startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() - date.getDay());
+                endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7 - date.getDay());
+                break;
+            case 'monthly':
+                startDate = new Date(date.getFullYear(), date.getMonth(), 1);
+                endDate = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+                break;
+            case 'fweeks':
+                startDate = new Date(date.getFullYear(), date.getMonth(), 1);
+                endDate = new Date(date.getFullYear(), date.getMonth(), 15);
+                break;
+            case 'smonth':
+                startDate = new Date(date.getFullYear(), date.getMonth(), 16);
+                endDate = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+                break;
+            case '2025':
+                startDate = new Date(2025, 0, 1);
+                endDate = new Date(2026, 0, 1);
+                break;
+            case 'all':
+                startDate = new Date(0);
+                endDate = new Date(8640000000000000);
+                break;
+            default:
+                return error(400, {
+                    success: false,
+                    message: 'Invalid time range'
+                });
+        }
+
+        const groupedVideos = await prisma.video.groupBy({
+            by: ['youtubeId'],
+            where: {
+                userId: userFound.id,
+                createAt: {
+                    gte: startDate,
+                    lt: endDate
+                },
+            },
+            _count: {
+                youtubeId: true
+            },
+            orderBy: {
+                _count: {
+                    youtubeId: 'desc'
+                }
+            }
+        });
 
         const detailedVideos = await prisma.video.findMany({
             where: {
