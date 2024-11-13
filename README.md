@@ -29,7 +29,7 @@ This command will launch the server, allowing you to view and interact with the 
 - **Add a Prisma seed**: To initialize the database with a default user, create a Prisma seed file and run the following command:
 
   ```sh
-  npx prisma db seed
+  bunx seed
   ```
 
   This will populate your database with essential initial data.
