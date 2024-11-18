@@ -46,4 +46,10 @@ package-lock.json
 prisma/migrations/**
 
 .idea/
-/dist/*
+server.exe
+extension/package.json
+extension/bun.lockb
+extension/node_modules/
+extension/postcss.config.js
+extension/tailwind.config.js
+extension/tsconfig.json
