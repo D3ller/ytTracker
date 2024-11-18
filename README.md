@@ -1,15 +1,37 @@
-# Elysia with Bun runtime
+# YT Stats Tracker
 
-## Getting Started
-To get started with this template, simply paste this command into your terminal:
-```bash
-bun create elysia ./elysia-example
+## Description
+
+YT Stats Tracker is a web application for tracking YouTube video and channel statistics. This project is built entirely in TypeScript and uses ElysiaJS as its backend framework, ensuring a modern, scalable setup. It is also open-source, making it freely available for anyone to use and modify. With this tool, users can monitor how many times a video has been viewed, the frequency of watching a channel, and the time spent on each video. This project is built using Bun, offering a fast and lightweight experience for development. The combination of Bun, ElysiaJS, and TypeScript makes this project efficient and easy to extend.
+
+### Prerequisites
+
+Before you begin, make sure you have [Bun](https://bun.sh) installed on your system. To install Bun, run the following command:
+
+```sh
+curl -fsSL https://bun.sh/install | bash
 ```
 
-## Development
-To start the development server run:
-```bash
-bun run dev
+### Running the App
+
+After installing Bun, you can start the development server by navigating to the project directory and running:
+
+```sh
+bun dev
 ```
 
-Open http://localhost:3000/ with your browser to see the result.
+This command will launch the server, allowing you to view and interact with the YT Stats Tracker app.
+
+### Browser Extension Setup
+
+For a complete experience, YT Stats Tracker requires a browser extension. To add the extension, follow these steps:
+
+1. Open your browser's extensions page.
+2. Enable "Developer Mode."
+3. Load an unpacked extension by selecting the directory containing the extension source code.
+
+Once loaded, this extension will connect with the YT Stats Tracker server, allowing seamless tracking of YouTube activities.
+
+### Conclusion
+
+YT Stats Tracker is a straightforward way to analyze YouTube viewing habits, providing insight into video consumption patterns. Follow the above steps to get up and running quickly!

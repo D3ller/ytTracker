@@ -64,6 +64,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } catch (e) {
             console.error("Error:", e);
+            alert("You are already logged in!");
+            }
+        } catch (e) {
+            console.error("Error:", e);
         }
     }
 })

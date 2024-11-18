@@ -21,18 +21,17 @@ model Video {
   userId         Int
   createAt       DateTime           @default(now())
   userController User               @relation(fields: [userId], references: [id])
-  information    VideoInformation[]
+  information    VideoInformation[] @relation("VideoInformationRelation")
 }
 
 model VideoInformation {
-  id          Int      @id @default(autoincrement())
-  video       Video    @relation(fields: [videoId], references: [id])
-  videoId     Int
-  title       String
-  description String
-  thumbnail   String
-  publishedAt DateTime
-  duration    Int
+  id        Int     @id @default(autoincrement())
+  title     String
+  thumbnail String
+  author    String
+  authorUrl String?
+  videos    Video[] @relation("VideoInformationRelation")
+  videoId   String? @unique
 }
 
 datasource db {
