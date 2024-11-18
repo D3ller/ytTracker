@@ -46,3 +46,4 @@ package-lock.json
 prisma/migrations/**
 
 .idea/
+/dist/*
