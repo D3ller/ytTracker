@@ -4,15 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-<h1>YouTube Tracker</h1>
-<form id="loginForm">
+<h1 class="text-3xl font-semibold gradient-text text-center">YouTube Tracker</h1>
+<form id="loginForm" class="mt-5 flex flex-col gap-3">
+
+    <p id="status" class="hidden"></p>
+
     <input type="text" id="username" placeholder="Username" value="korqasssssssggaaaggs8" required>
     <input type="password" id="password" placeholder="Password" value="Maconel04" required>
     <button type="submit">Login</button>
+
+    <p class="text-sm text-gray-600 dark:text-gray-400">Create by <a class="underline" target="_blank" href="https://cnelhomme.xyz">C.Nelhomme</a></p>
 </form>
-<p id="status"></p>
+
+<div id="profile" class="hidden">profile</div>
 <script src="popup.js"></script>
 </body>
 </html>
