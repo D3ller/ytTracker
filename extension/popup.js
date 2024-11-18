@@ -1,4 +1,9 @@
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
+"use strict";
+
+let loginForm = document.getElementById("loginForm");
+let profileUser = document.getElementById("profile");
+
+loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const username = document.getElementById("username").value;
@@ -19,13 +24,10 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
             document.getElementById("status").innerText = "Login successful!";
             const profile = await response.json();
             localStorage.setItem("profile", JSON.stringify(profile.user));
-            console.log(localStorage.getItem("profile"));
-
         } else {
             throw new Error(`You are already logged in!`);
         }
     } catch (error) {
-        console.error("Login error:", error);
         appear(document.getElementById("status"));
         document.getElementById("status").innerText = error;
     }
@@ -55,12 +57,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 credentials: "include"
             });
             if(response.ok) {
+                const profile = await response.json();
+                localStorage.setItem("profile", JSON.stringify(profile.user));
+                appear(loginForm);
+                appear(profileUser);
+            }
+        } catch (e) {
+            console.error("Error:", e);
             alert("You are already logged in!");
             }
         } catch (e) {
             console.error("Error:", e);
-
-
         }
     }
 })
