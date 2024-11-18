@@ -12,60 +12,10 @@ export const video = t.Object({
 })
 
 export type Video = typeof video.static;
-export type TimeRange = 'today' | 'weekly' | 'monthly' | 'fweeks' | 'smonth' | '2025' | 'all';
-const validTimeRanges: TimeRange[] = ['today', 'weekly', 'monthly', 'fweeks', 'smonth', '2025', 'all'];
+export type TimeRange = 'hourly' | 'today' | 'weekly' | 'monthly' | 'fweeks' | 'smonth' | '2024' | 'all';
+const validTimeRanges: TimeRange[] = ['hourly', 'today', 'weekly', 'monthly', 'fweeks', 'smonth', '2024', 'all'];
 
 export class Videos {
-
-    async getRecentVideo(id: number): Promise<Video[] | any> {
-
-        if (!id) {
-            return error(401, {
-                success: false,
-                message: 'Unauthorized2'
-            })
-        }
-
-        const user = new Users();
-        const userFound = await user.getUserById(id);
-        if (!userFound) {
-            return error(404, {
-                success: false,
-                message: 'User not found'
-            })
-        }
-
-
-        return prisma.video.findMany({
-            orderBy: {
-                createAt: 'desc'
-            },
-            take: 5,
-            where: {
-                userId: userFound.id
-            },
-            select: {
-                youtubeId: true,
-                createAt: true,
-                information: {
-                    select: {
-                        title: true,
-                        thumbnail: true,
-                        author: true
-                    }
-                }
-            }
-        }).then((videos) => {
-            if (videos.length === 0) return error(404, {
-                success: false,
-                message: 'Video not found'
-            })
-
-            return videos;
-        })
-
-
-    }
 
     async addVideo(userId: number, videoId: string) {
 
@@ -157,6 +107,53 @@ export class Videos {
         })
     }
 
+    async getTimeRangeDates(timeslot: TimeRange): { startDate: Date; endDate: Date } {
+        const date = new Date();
+        let startDate: Date;
+        let endDate: Date;
+
+        switch (timeslot) {
+            case 'hourly':
+                startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours());
+                endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours() + 1);
+                break;
+            case 'today':
+                startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+                break;
+            case 'weekly':
+                startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() - date.getDay());
+                endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7 - date.getDay());
+                console.log(startDate, endDate)
+                break;
+            case 'monthly':
+                startDate = new Date(date.getFullYear(), date.getMonth(), 1);
+                endDate = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+                break;
+            case 'fweeks':
+                startDate = new Date(date.getFullYear(), date.getMonth(), 1);
+                endDate = new Date(date.getFullYear(), date.getMonth(), 15);
+                break;
+            case 'smonth':
+                startDate = new Date(date.getFullYear(), date.getMonth(), 16);
+                endDate = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+                break;
+            case '2024':
+                startDate = new Date(2024, 0, 1);
+                endDate = new Date(2025, 0, 1);
+                break;
+            case 'all':
+                const currentDate = new Date();
+                startDate = new Date(currentDate.getFullYear() - 5, currentDate.getMonth(), currentDate.getDate());
+                endDate = currentDate;
+                break;
+            default:
+                throw new Error('Invalid time range');
+        }
+
+        return { startDate, endDate };
+    }
+
     async getVideoInfo(videoId: string) {
         try {
             const response = await fetch('https://noembed.com/embed?url=https://www.youtube.com/watch?v=' + videoId);
@@ -227,9 +224,9 @@ export class Videos {
                 startDate = new Date(date.getFullYear(), date.getMonth(), 16);
                 endDate = new Date(date.getFullYear(), date.getMonth() + 1, 1);
                 break;
-            case '2025':
-                startDate = new Date(2025, 0, 1);
-                endDate = new Date(2026, 0, 1);
+            case '2024':
+                startDate = new Date(2024, 0, 1);
+                endDate = new Date(2025, 0, 1);
                 break;
             case 'all':
                 startDate = new Date(0);
@@ -310,45 +307,7 @@ export class Videos {
             })
         }
 
-        const date = new Date();
-        let startDate: Date;
-        let endDate: Date;
-
-        switch (timeslot) {
-            case 'today':
-                startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-                endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
-                break;
-            case 'weekly':
-                startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() - date.getDay());
-                endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7 - date.getDay());
-                break;
-            case 'monthly':
-                startDate = new Date(date.getFullYear(), date.getMonth(), 1);
-                endDate = new Date(date.getFullYear(), date.getMonth() + 1, 1);
-                break;
-            case 'fweeks':
-                startDate = new Date(date.getFullYear(), date.getMonth(), 1);
-                endDate = new Date(date.getFullYear(), date.getMonth(), 15);
-                break;
-            case 'smonth':
-                startDate = new Date(date.getFullYear(), date.getMonth(), 16);
-                endDate = new Date(date.getFullYear(), date.getMonth() + 1, 1);
-                break;
-            case '2025':
-                startDate = new Date(2025, 0, 1);
-                endDate = new Date(2026, 0, 1);
-                break;
-            case 'all':
-                startDate = new Date(0);
-                endDate = new Date(8640000000000000);
-                break;
-            default:
-                return error(400, {
-                    success: false,
-                    message: 'Invalid time range'
-                });
-        }
+        const { startDate, endDate } = await this.getTimeRangeDates(timeslot);
 
         const groupedVideos = await prisma.video.groupBy({
             by: ['youtubeId'],
@@ -399,4 +358,180 @@ export class Videos {
 
 
     }
+
+    async getRecentVideos(id: string) {
+
+        const user = new Users();
+        const userFound = await user.getUserById(parseInt(id));
+        if (!userFound) {
+            return error(404, {
+                success: false,
+                message: 'User not found'
+            })
+        }
+
+        return prisma.video.findMany({
+            orderBy: {
+                createAt: 'desc'
+            },
+            take: 10,
+            where: {
+                userId: parseInt(id),
+            },
+            select: {
+                youtubeId: true,
+                createAt: true,
+                information: {
+                    select: {
+                        title: true,
+                        thumbnail: true,
+                        author: true,
+                        authorUrl: true
+                    },
+                }
+            }
+        })
+    }
+
+    async getPopularVideos(timeslot: TimeRange, userid: string) {
+
+        if (!validTimeRanges.includes(timeslot)) {
+            return error(400, {
+                success: false,
+                message: 'Invalid time range'
+            });
+        }
+
+        const user = new Users();
+        const userFound = await user.getUserById(parseInt(userid));
+        if (!userFound) {
+            return error(404, {
+                success: false,
+                message: 'User not found'
+            })
+        }
+
+        const { startDate, endDate } = await this.getTimeRangeDates(timeslot);
+
+        let group = await prisma.video.groupBy({
+            by: ['youtubeId'],
+            where: {
+                userId: userFound.id,
+                createAt: {
+                    gte: startDate,
+                    lt: endDate
+                }
+            },
+            _count: {
+                youtubeId: true
+            },
+            orderBy: {
+                _count: {
+                    youtubeId: 'desc'
+                }
+            }
+        });
+
+        let detailedVideos = await prisma.video.findMany({
+            where: {
+                youtubeId: {in: group.map(g => g.youtubeId)},
+                userId: userFound.id
+            },
+            select: {
+                youtubeId: true,
+                createAt: true,
+                information: {
+                    select: {
+                        title: true,
+                        thumbnail: true,
+                        author: true,
+                        authorUrl: true
+
+                    }
+                }
+            }
+        })
+
+        let finalResult = group.map(group => {
+            let details = detailedVideos.find(video => video.youtubeId === group.youtubeId);
+            return {
+                ...group,
+                information: details?.information
+            }
+        })
+
+        return finalResult;
+    }
+
+    async getPopularVideast(timeslot: TimeRange, userid: string) {
+
+            if (!validTimeRanges.includes(timeslot)) {
+                return error(400, {
+                    success: false,
+                    message: 'Invalid time range'
+                });
+            }
+
+            const user = new Users();
+            const userFound = await user.getUserById(parseInt(userid));
+            if (!userFound) {
+                return error(404, {
+                    success: false,
+                    message: 'User not found'
+                })
+            }
+
+            const { startDate, endDate } = await this.getTimeRangeDates(timeslot);
+
+            let group = await prisma.video.groupBy({
+                by: ['youtubeId'],
+                where: {
+                    userId: userFound.id,
+                    createAt: {
+                        gte: startDate,
+                        lt: endDate
+                    }
+                },
+                _count: {
+                    youtubeId: true
+                },
+                orderBy: {
+                    _count: {
+                        youtubeId: 'desc'
+                    }
+                }
+            });
+
+            let groupVideast = await prisma.videoInformation.groupBy({
+                by: ['authorUrl'],
+                where: {
+                    videoId: {in: group.map(g => g.youtubeId)}
+                },
+                _count: {
+                    authorUrl: true
+                },
+            })
+
+            let information = await prisma.videoInformation.findMany({
+                where: {
+                    authorUrl: {in: groupVideast.map(g => g.authorUrl)}
+                },
+                select: {
+                    author: true,
+                    authorUrl: true
+                }
+            })
+
+
+        let finalResult = groupVideast.map(group => {
+            let details = information.find(video => video.authorUrl === group.authorUrl);
+            return {
+                ...group,
+                information: details
+            }
+        })
+
+            return finalResult.sort((a, b) => b._count.authorUrl - a._count.authorUrl);
+    }
+
 }
