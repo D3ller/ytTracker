@@ -21,14 +21,22 @@ export const videoController = new Elysia({prefix: '/videos'})
     })
 
 export const statsController = new Elysia({prefix: '/stats'})
-.use(userService)
     .use(userService)
     .decorate('video', new Videos())
+    .get('/username/:id/:username', async ({params: {id, username}, video}) => {
+        return video.getStatsByUsername(id, username)
+    }, {
+        params: t.Object({
+            id: t.String(),
+            username: t.String()
+
+        }),
+    })
     .use(getUserId)
     .get('/:id', async ({params: {id}, userInfo, video}) => {
         return video.getStats(id, userInfo.id)
     }, {
         params: t.Object({
             id: t.String()
-        }),
+        })
     })
