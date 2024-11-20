@@ -4,8 +4,11 @@
   </a>
 </p>
 
+<p align="center">
+<a href=""><img src="https://img.shields.io/badge/version-v.1.0.0-red"</a>
+</p>
 
-# YT Stats Tracker
+# YT Stats Tracker 📊
 
 ## Description
 
