@@ -6,11 +6,12 @@
 
 <p align="center">
 <a href=""><img src="https://img.shields.io/badge/version-v.1.0.0-red"</a>
-    <a href="https://chat.vitejs.dev"><img src="https://img.shields.io/badge/chat-discord-blue?style=flat&logo=discord" alt="discord chat"></a>
-
+<a href="https://chat.vitejs.dev"><img src="https://img.shields.io/badge/chat-discord-blue?style=flat&logo=discord" alt="discord chat"></a>
 </p>
 
 # YT Stats Tracker 📊
+
+> Track your daily stats on YouTube
 
 ## Description
 
