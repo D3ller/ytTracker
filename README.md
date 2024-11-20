@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="" target="_blank" rel="noopener noreferrer">
+    <img width="180" src="[https://vitejs.dev/logo.svg](https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg)" alt="Youtube logo">
+  </a>
+</p>
+
 
 # YT Stats Tracker
 
