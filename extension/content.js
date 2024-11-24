@@ -4,8 +4,9 @@ function checkVideoChange() {
     if (window.location.href.includes('/watch') && currentUrl !== window.location.href) {
         currentUrl = window.location.href;
         const videoId = new URLSearchParams(window.location.search).get('v');
+        const channelId = new URLSearchParams(window.location.search).get('ab_channel');
 
-        if (videoId) {
+        if (videoId && !channelId) {
             console.log(`Detected video change, Video ID: ${videoId}`);
             chrome.runtime.sendMessage({ action: "sendVideoId", videoId }, (response) => {
                 if (chrome.runtime.lastError) {
@@ -69,6 +70,9 @@ function sendVideoIdToServer(videoId) {
             }
             return response.text();
         })
-        .then((result) => console.log("Video ID sent successfully:", result))
+        .then((result) => {
+            console.log(result)
+         console.log("Video ID sent successfully:", result)
+        })
         .catch((error) => console.error("Failed to send video ID:", error));
 }

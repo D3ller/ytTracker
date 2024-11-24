@@ -1,15 +1,17 @@
 import {Elysia, error, t} from "elysia";
 import {swagger} from '@elysiajs/swagger'
-import { opentelemetry } from '@elysiajs/opentelemetry'
 import { jwt } from "@elysiajs/jwt";
 import { cors } from '@elysiajs/cors'
+import { rateLimit } from 'elysia-rate-limit'
+
 
 import {userController} from "./controllers/userController";
-import {statsController, videoController} from "./controllers/videoControllers";
+import {videoController} from "./controllers/videoControllers";
+import {channelController} from "./controllers/channelController";
+import {statsController} from "./controllers/statsController";
 
 
 const app = new Elysia()
-    .use(opentelemetry())
     .use(swagger())
     .use(jwt({
         name: 'jwt',
@@ -24,6 +26,7 @@ const app = new Elysia()
     .use(videoController)
     .use(userController)
     .use(statsController)
+    .use(channelController)
     .listen(3000);
 
 console.log(
