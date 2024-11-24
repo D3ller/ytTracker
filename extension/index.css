@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply dark:bg-background bg-white w-80 min-h-72 py-8 px-5 flex justify-center flex-col rounded-md font-DMSans relative;
+    }
+}
+
+@layer components {
+    input {
+        @apply w-full px-3.5 py-2.5 ring-inset ring-gray-300 shadow-sm bg-white text-gray-900 dark:text-white ring-1 cursor-pointer rounded-md text-sm focus:outline-none border-0 disabled:cursor-not-allowed dark:bg-neutral-900 dark:ring-gray-700 focus:ring-2
+    }
+
+    button[type=submit] {
+        @apply bg-primary px-4 py-2 text-white rounded-md text-sm focus-visible:outline-none hover:ring-2 hover:ring-primary hover:ring-offset-2 hover:dark:ring-offset-background hover:ring-offset-white duration-500 font-bold
+    }
+}
+
+@layer utilities {
+    .gradient-text {
+        @apply text-transparent bg-clip-text bg-gradient-to-b from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-300;
+    }
+
+    #status {
+        @apply px-4 py-2 ring-1 ring-gray-300 shadow-sm bg-white dark:bg-neutral-900 text-sm text-gray-900 dark:text-white dark:ring-gray-700 rounded-md text-center;
+    }
+}

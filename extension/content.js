@@ -69,6 +69,9 @@ function sendVideoIdToServer(videoId) {
             }
             return response.text();
         })
-        .then((result) => console.log("Video ID sent successfully:", result))
+        .then((result) => {
+            console.log(result)
+         console.log("Video ID sent successfully:", result)
+        })
         .catch((error) => console.error("Failed to send video ID:", error));
 }
