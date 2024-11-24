@@ -1,11 +1,21 @@
 import {Elysia, t} from "elysia";
 import {Videos} from "../models/videoModels";
 import {getUserId, userService} from "./userController";
+import {Generator, rateLimit} from "elysia-rate-limit";
+
+const keyGenerator: Generator<{ ip: string }> = async (req, server, {ip}) => Bun.hash(JSON.stringify(ip)).toString()
 
 export const videoController = new Elysia({prefix: '/videos'})
     .use(userService)
     .decorate('video', new Videos())
     .use(getUserId)
+    .use((rateLimit({
+        scoping: 'scoped',
+        max: 1,
+        duration: 1000,
+        generator: keyGenerator,
+        errorResponse: 'You are doing too many requests',
+    })))
     .put('/add', async ({userInfo, video, body: {videoId}, error}) => {
         console.log(videoId)
         return video.addVideo(userInfo.id, videoId)
@@ -15,52 +25,9 @@ export const videoController = new Elysia({prefix: '/videos'})
         }),
         isSignIn: true
     })
-
-export const statsController = new Elysia({prefix: '/stats'})
-    .use(userService)
-    .model({
-        id: t.Object({
-            id: t.String()
-        })
+    .get('/info/:id', async ({params: {id}, video}) => {
+        return video.getInfo(id)
     })
-    .decorate('video', new Videos())
-    .post('/username/:id', async ({params: {id}, body: {username}, video}) => {
-        return video.getStatsByUsername(id, username)
-    }, {
-        params: t.Object({
-            id: t.String()
-        }),
-        body: t.Object({
-            username: t.String()
-        })
-    })
-    .use(getUserId)
-    .get('/', async ({userInfo, video}) => {
-        return video.getStats("today", userInfo.id)
-    })
-    .get('/:id', async ({params: {id}, userInfo, video}) => {
-        return video.getStats(id, userInfo.id)
-    }, {
-        params: t.Object({
-            id: t.String()
-        })
-    })
-    .get('/recent', async ({video, userInfo}) => {
-        return video.getRecentVideos(userInfo.id)
-    })
-    .get('/popular', async ({video, userInfo}) => {
-        return video.getPopularVideos("today", userInfo.id)
-    })
-    .get('/popular/:id', async ({params: {id}, video, userInfo}) => {
-        return video.getPopularVideos(id, userInfo.id)
-    }, {
-        params: 'id'
-    })
-    .get('/videast', async ({video, userInfo}) => {
-        return video.getPopularVideast("today", userInfo.id)
-    })
-    .get('/videast/:id', async ({params: {id}, video, userInfo}) => {
-        return video.getPopularVideast(id, userInfo.id)
-    }, {
-        params: 'id'
+    .get('/null', async ({video}) => {
+        return video.getNull()
     })

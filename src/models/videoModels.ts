@@ -122,21 +122,22 @@ export class Videos {
                 endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
                 break;
             case 'weekly':
-                startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() - date.getDay());
-                endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7 - date.getDay());
-                console.log(startDate, endDate)
+                startDate = new Date(date);
+                startDate.setDate(date.getDate() - date.getDay() - 6);
+                endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
                 break;
             case 'monthly':
                 startDate = new Date(date.getFullYear(), date.getMonth(), 1);
                 endDate = new Date(date.getFullYear(), date.getMonth() + 1, 1);
                 break;
             case 'fweeks':
-                startDate = new Date(date.getFullYear(), date.getMonth(), 1);
-                endDate = new Date(date.getFullYear(), date.getMonth(), 15);
+                startDate = new Date(date);
+                startDate.setDate(startDate.getDate() - 35);
+                endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
                 break;
             case 'smonth':
-                startDate = new Date(date.getFullYear(), date.getMonth(), 16);
-                endDate = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+                startDate = new Date(date.getFullYear(), date.getMonth() - 6, 16);
+                endDate = new Date(date.getFullYear(), date.getMonth() + 6, 1);
                 break;
             case '2024':
                 startDate = new Date(2024, 0, 1);
@@ -151,7 +152,7 @@ export class Videos {
                 throw new Error('Invalid time range');
         }
 
-        return { startDate, endDate };
+        return {startDate, endDate};
     }
 
     async getVideoInfo(videoId: string) {
@@ -175,120 +176,82 @@ export class Videos {
         }
     }
 
-    async getStats(timeslot: TimeRange, userId: number) {
-        if (!validTimeRanges.includes(timeslot)) {
-            return error(400, {
-                success: false,
-                message: 'Invalid time range'
-            });
-        }
-
-        if (!userId) {
-            return error(401, {
-                success: false,
-                message: 'Unauthorized'
-            })
-        }
-
-        const user = new Users();
-        const userFound = await user.getUserById(userId);
-        if (!userFound) {
-            return error(404, {
-                success: false,
-                message: 'User not found'
-            })
-        }
-
-        const date = new Date();
-        let startDate: Date;
-        let endDate: Date;
-
-        switch (timeslot) {
-            case 'today':
-                startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-                endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
-                break;
-            case 'weekly':
-                startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() - date.getDay());
-                endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 7 - date.getDay());
-                break;
-            case 'monthly':
-                startDate = new Date(date.getFullYear(), date.getMonth(), 1);
-                endDate = new Date(date.getFullYear(), date.getMonth() + 1, 1);
-                break;
-            case 'fweeks':
-                startDate = new Date(date.getFullYear(), date.getMonth(), 1);
-                endDate = new Date(date.getFullYear(), date.getMonth(), 15);
-                break;
-            case 'smonth':
-                startDate = new Date(date.getFullYear(), date.getMonth(), 16);
-                endDate = new Date(date.getFullYear(), date.getMonth() + 1, 1);
-                break;
-            case '2024':
-                startDate = new Date(2024, 0, 1);
-                endDate = new Date(2025, 0, 1);
-                break;
-            case 'all':
-                startDate = new Date(0);
-                endDate = new Date(8640000000000000);
-                break;
-            default:
-                return error(400, {
-                    success: false,
-                    message: 'Invalid time range'
-                });
-        }
-
-        const groupedVideos = await prisma.video.groupBy({
-            by: ['youtubeId'],
-            where: {
-                userId: userFound.id,
-                createAt: {
-                    gte: startDate,
-                    lt: endDate
-                },
-            },
-            _count: {
-                youtubeId: true
-            },
-            orderBy: {
-                _count: {
-                    youtubeId: 'desc'
-                }
-            }
-        });
-
-
-        const detailedVideos = await prisma.video.findMany({
-            where: {
-                youtubeId: { in: groupedVideos.map(g => g.youtubeId) },
-                userId: userFound.id,
-            },
-            select: {
-                youtubeId: true,
-                information: {
-                    select: {
-                        title: true,
-                        thumbnail: true,
-                        author: true,
-                        authorUrl: true
-                    }
-                }
-            }
-        });
-
-        const finalResult = groupedVideos.map(group => {
-            const details = detailedVideos.find(video => video.youtubeId === group.youtubeId);
-            return {
-                ...group,
-                information: details?.information
-            };
-        });
-
-        return finalResult;
-
-
-    }
+    // async getStats(timeslot: TimeRange, userId: number) {
+    //     if (!validTimeRanges.includes(timeslot)) {
+    //         return error(400, {
+    //             success: false,
+    //             message: 'Invalid time range'
+    //         });
+    //     }
+    //
+    //     if (!userId) {
+    //         return error(401, {
+    //             success: false,
+    //             message: 'Unauthorized'
+    //         })
+    //     }
+    //
+    //     const user = new Users();
+    //     const userFound = await user.getUserById(userId);
+    //     if (!userFound) {
+    //         return error(404, {
+    //             success: false,
+    //             message: 'User not found'
+    //         })
+    //     }
+    //
+    //     const {startDate, endDate} = this.getTimeRangeDates(timeslot);
+    //
+    //     const groupedVideos = await prisma.video.groupBy({
+    //         by: ['youtubeId'],
+    //         where: {
+    //             userId: userFound.id,
+    //             createAt: {
+    //                 gte: startDate,
+    //                 lt: endDate
+    //             },
+    //         },
+    //         _count: {
+    //             youtubeId: true
+    //         },
+    //         orderBy: {
+    //             _count: {
+    //                 youtubeId: 'desc'
+    //             }
+    //         }
+    //     });
+    //
+    //
+    //     const detailedVideos = await prisma.video.findMany({
+    //         where: {
+    //             youtubeId: {in: groupedVideos.map(g => g.youtubeId)},
+    //             userId: userFound.id,
+    //         },
+    //         select: {
+    //             youtubeId: true,
+    //             information: {
+    //                 select: {
+    //                     title: true,
+    //                     thumbnail: true,
+    //                     author: true,
+    //                     authorUrl: true
+    //                 }
+    //             }
+    //         }
+    //     });
+    //
+    //     const finalResult = groupedVideos.map(group => {
+    //         const details = detailedVideos.find(video => video.youtubeId === group.youtubeId);
+    //         return {
+    //             ...group,
+    //             information: details?.information
+    //         };
+    //     });
+    //
+    //     return finalResult;
+    //
+    //
+    // }
 
     async getStatsByUsername(timeslot: TimeRange, username: string) {
         if (!validTimeRanges.includes(timeslot)) {
@@ -307,7 +270,7 @@ export class Videos {
             })
         }
 
-        const { startDate, endDate } = await this.getTimeRangeDates(timeslot);
+        const {startDate, endDate} = await this.getTimeRangeDates(timeslot);
 
         const groupedVideos = await prisma.video.groupBy({
             by: ['youtubeId'],
@@ -330,7 +293,7 @@ export class Videos {
 
         const detailedVideos = await prisma.video.findMany({
             where: {
-                youtubeId: { in: groupedVideos.map(g => g.youtubeId) },
+                youtubeId: {in: groupedVideos.map(g => g.youtubeId)},
                 userId: userFound.id,
             },
             select: {
@@ -343,7 +306,8 @@ export class Videos {
                         authorUrl: true
                     }
                 }
-            }
+            },
+            take: 100
         });
 
         const finalResult = groupedVideos.map(group => {
@@ -402,6 +366,9 @@ export class Videos {
             });
         }
 
+        console.log(timeslot, userid)
+
+
         const user = new Users();
         const userFound = await user.getUserById(parseInt(userid));
         if (!userFound) {
@@ -411,7 +378,107 @@ export class Videos {
             })
         }
 
-        const { startDate, endDate } = await this.getTimeRangeDates(timeslot);
+        const {startDate, endDate} = await this.getTimeRangeDates(timeslot);
+
+        let group = await prisma.video.groupBy({
+            by: ['youtubeId'],
+            where: {
+                userId: userFound.id,
+                createAt: {
+                    gte: startDate,
+                    lt: endDate
+                }
+            },
+            _count: {
+                youtubeId: true
+            },
+            orderBy: {
+                _count: {
+                    youtubeId: 'desc'
+                }
+            },
+            take: 100
+        });
+
+
+        let detailedVideos = await prisma.video.findMany({
+            where: {
+                youtubeId: {in: group.map(g => g.youtubeId)},
+                userId: userFound.id
+            },
+            select: {
+                youtubeId: true,
+                createAt: true,
+                information: {
+                    select: {
+                        title: true,
+                        thumbnail: true,
+                        author: true,
+                        authorUrl: true
+                    }
+                }
+            },
+        })
+
+        // console.log(group.length, detailedVideos.length)
+
+        const result = group.map(g => {
+            let v = detailedVideos.find(v => v.youtubeId === g.youtubeId);
+            return {g, v}
+        });
+
+
+        const videosWithoutInfo = await prisma.video.findMany({
+            where: {
+                information: {
+                    none: {} // Renvoie les vidéos sans information associée
+                },
+                youtubeId: { in: group.map(g => g.youtubeId) }
+            }
+        });
+
+        console.log(videosWithoutInfo)
+
+        const formattedResult = result.map(item => {
+            // console.log(item)
+            // fetch('https://ntfy.sh/archivecorefr', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify({result})
+            // })
+            return {
+                youtubeId: item.g.youtubeId,
+                information: item.v.information,
+                _count: {
+                    youtubeId: item.g._count.youtubeId,
+                }
+            };
+        });
+
+        return formattedResult.slice(0, 100);
+    }
+
+    async getPopularVideast(timeslot: TimeRange, userid: string) {
+
+        if (!validTimeRanges.includes(timeslot)) {
+            return error(400, {
+                success: false,
+                message: 'Invalid time range'
+            });
+        }
+
+        const user = new Users();
+        const userFound = await user.getUserById(parseInt(userid));
+        if (!userFound) {
+            return error(404, {
+                success: false,
+                message: 'User not found'
+            })
+        }
+
+        const {startDate, endDate} = await this.getTimeRangeDates(timeslot);
 
         let group = await prisma.video.groupBy({
             by: ['youtubeId'],
@@ -432,95 +499,26 @@ export class Videos {
             }
         });
 
-        let detailedVideos = await prisma.video.findMany({
+        let groupVideast = await prisma.videoInformation.groupBy({
+            by: ['authorUrl'],
             where: {
-                youtubeId: {in: group.map(g => g.youtubeId)},
-                userId: userFound.id
+                videoId: {in: group.map(g => g.youtubeId)}
+            },
+            _count: {
+                authorUrl: true
+            },
+        })
+
+        let information = await prisma.videoInformation.findMany({
+            where: {
+                authorUrl: {in: groupVideast.map(g => g.authorUrl)}
             },
             select: {
-                youtubeId: true,
-                createAt: true,
-                information: {
-                    select: {
-                        title: true,
-                        thumbnail: true,
-                        author: true,
-                        authorUrl: true
-
-                    }
-                }
-            }
+                author: true,
+                authorUrl: true
+            },
+            take: 100
         })
-
-        let finalResult = group.map(group => {
-            let details = detailedVideos.find(video => video.youtubeId === group.youtubeId);
-            return {
-                ...group,
-                information: details?.information
-            }
-        })
-
-        return finalResult;
-    }
-
-    async getPopularVideast(timeslot: TimeRange, userid: string) {
-
-            if (!validTimeRanges.includes(timeslot)) {
-                return error(400, {
-                    success: false,
-                    message: 'Invalid time range'
-                });
-            }
-
-            const user = new Users();
-            const userFound = await user.getUserById(parseInt(userid));
-            if (!userFound) {
-                return error(404, {
-                    success: false,
-                    message: 'User not found'
-                })
-            }
-
-            const { startDate, endDate } = await this.getTimeRangeDates(timeslot);
-
-            let group = await prisma.video.groupBy({
-                by: ['youtubeId'],
-                where: {
-                    userId: userFound.id,
-                    createAt: {
-                        gte: startDate,
-                        lt: endDate
-                    }
-                },
-                _count: {
-                    youtubeId: true
-                },
-                orderBy: {
-                    _count: {
-                        youtubeId: 'desc'
-                    }
-                }
-            });
-
-            let groupVideast = await prisma.videoInformation.groupBy({
-                by: ['authorUrl'],
-                where: {
-                    videoId: {in: group.map(g => g.youtubeId)}
-                },
-                _count: {
-                    authorUrl: true
-                },
-            })
-
-            let information = await prisma.videoInformation.findMany({
-                where: {
-                    authorUrl: {in: groupVideast.map(g => g.authorUrl)}
-                },
-                select: {
-                    author: true,
-                    authorUrl: true
-                }
-            })
 
 
         let finalResult = groupVideast.map(group => {
@@ -531,7 +529,31 @@ export class Videos {
             }
         })
 
-            return finalResult.sort((a, b) => b._count.authorUrl - a._count.authorUrl);
+        return finalResult.sort((a, b) => b._count.authorUrl - a._count.authorUrl).slice(0, 100);
+    }
+
+    async getInfo(id: string) {
+
+        console.log(id)
+
+        return prisma.video.findMany({
+            where: {
+                youtubeId: id
+            },
+            include: {
+                information: true
+            }
+        });
+    }
+
+    async getNull() {
+        return prisma.video.findMany({
+            where: {
+                information: {
+                    none: {}
+                }
+            }
+        })
     }
 
 }
