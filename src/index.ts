@@ -9,11 +9,7 @@ import {channelController} from "./controllers/channelController";
 import {statsController} from "./controllers/statsController";
 
 
-const app = new Elysia({
-    serve: {
-        port: 9666,
-    }
-})
+const app = new Elysia()
     .use(swagger())
     .use(jwt({
         name: 'jwt',
@@ -29,7 +25,7 @@ const app = new Elysia({
     .use(userController)
     .use(statsController)
     .use(channelController)
-    .listen(3000);
+    .listen(9666);
 
 console.log(
     `👺 Le serveur est lancé sur http://${app.server?.hostname}:${app.server?.port}`
