@@ -1,9 +1,7 @@
 import {Elysia, error, t} from "elysia";
 import {swagger} from '@elysiajs/swagger'
-import { jwt } from "@elysiajs/jwt";
-import { cors } from '@elysiajs/cors'
-import { rateLimit } from 'elysia-rate-limit'
-
+import {jwt} from "@elysiajs/jwt";
+import {cors} from '@elysiajs/cors'
 
 import {userController} from "./controllers/userController";
 import {videoController} from "./controllers/videoControllers";
@@ -11,13 +9,17 @@ import {channelController} from "./controllers/channelController";
 import {statsController} from "./controllers/statsController";
 
 
-const app = new Elysia()
+const app = new Elysia({
+    serve: {
+        port: 9666,
+    }
+})
     .use(swagger())
     .use(jwt({
         name: 'jwt',
         secret: Bun.env.JWT_SECRET || 'secret',
     }))
-    .onError(({ error, code }) => {
+    .onError(({error, code}) => {
         if (code === 'NOT_FOUND') return
 
         console.error(error)

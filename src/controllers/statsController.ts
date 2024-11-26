@@ -17,7 +17,7 @@ export const statsController = new Elysia({prefix: '/stats'})
             id: t.String()
         }),
         body: t.Object({
-            username: t.String({default: 'korqasssssssggaaaggs8'})
+            username: t.String()
         })
     })
     .use(getUserId)
